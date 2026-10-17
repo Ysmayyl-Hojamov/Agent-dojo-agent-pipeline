@@ -1,0 +1,2 @@
+class SessionModel:
+    pass
