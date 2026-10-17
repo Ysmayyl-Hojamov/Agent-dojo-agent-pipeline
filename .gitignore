@@ -12,3 +12,4 @@ wheels/
 #Custom
 .env
 .DS_Store
+notes.txt
