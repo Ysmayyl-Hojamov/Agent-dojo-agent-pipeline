@@ -10,4 +10,3 @@ model_gemini = agent_pipeline.GoogleLLM(model="gemini-3.8-flash", client=client)
 response = client.models.generate_content(
     model="gemini-3.8-flash", contents="Hello, Gemini!"
 )
-print(f"Gemini says: {response.text}")
