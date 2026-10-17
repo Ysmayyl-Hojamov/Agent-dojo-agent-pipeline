@@ -1,0 +1,20 @@
+[project]
+name = "benchmark-dojo"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "808thlife", email = "khqyop@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "agentdojo>=0.1.35",
+    "python-dotenv>=1.2.4",
+]
+
+[project.scripts]
+benchmark-dojo = "benchmark_dojo:main"
+
+[build-system]
+requires = ["uv_build>=0.12.1,<0.13.0"]
+build-backend = "uv_build"
