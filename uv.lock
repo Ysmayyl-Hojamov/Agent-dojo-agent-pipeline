@@ -78,12 +78,14 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "agentdojo" },
+    { name = "openai" },
     { name = "python-dotenv" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "agentdojo", specifier = ">=0.1.35" },
+    { name = "openai", specifier = ">=3.33.0" },
     { name = "python-dotenv", specifier = ">=1.2.4" },
 ]
 
