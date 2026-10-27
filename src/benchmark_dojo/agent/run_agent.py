@@ -32,7 +32,6 @@ from benchmark_dojo.utils import openai_key
 MY_MODEL = "deepseek/deepseek-v4.1-flash-1017"
 MODEL_NAMES[MY_MODEL] = "DeepSeek"
 
-print("AFTER MY MODEL")
 
 client = OpenAI(
     api_key=openai_key,
@@ -40,8 +39,6 @@ client = OpenAI(
 )
 llm = OpenAILLM(model=MY_MODEL, client=client)
 
-
-print("CLIENT AFTER")
 
 pipeline = AgentPipeline(
     [
@@ -53,21 +50,22 @@ pipeline = AgentPipeline(
 )
 
 pipeline.name = MY_MODEL
-print("PIPELINE ROUTINE")
 # --- the attack: one user task, one injection task ---
 suite = get_suite("v1.2", "workspace")
 # I can swap the type of the attack to create a new dataset
 attack = load_attack("important_instructions", suite, pipeline)
 
-print("ATTACK LOADED")
-
 logdir = Path("./runs")
 logdir.mkdir(exist_ok=True)
 
-print("MKDIR!")
-
 
 with OutputLogger(str(logdir)):
+    """
+    Could use the same function but iterative.
+    May use different wordings by a way of incantating
+    PREFIX (tone, urgency, and/or authority) + GOAL (existing goal) +- SUFFIX (Basically the continuation of PREFIX.)
+    — but I don't know how it's gonna word with polite goals (see injection task 0)
+    """
     results = benchmark_suite_with_injections(
         pipeline,
         suite,
