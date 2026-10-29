@@ -13,3 +13,7 @@ wheels/
 .env
 .DS_Store
 notes.txt
+# generated data
+runs/
+data/
+runs_spliced
