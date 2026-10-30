@@ -1,3 +1,7 @@
+"""
+Throwaway file.
+"""
+
 import json
 from pathlib import Path
 

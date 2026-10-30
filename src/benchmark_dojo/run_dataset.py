@@ -46,7 +46,9 @@ BUILTIN_ATTACK = "important_instructions"
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("--suite", default="workspace", choices=SUITES)
     parser.add_argument("--benchmark-version", default="v1.2")
     parser.add_argument(
@@ -59,10 +61,23 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         action="store_true",
         help=f"also run AgentDojo's own '{BUILTIN_ATTACK}' attack",
     )
-    parser.add_argument("--benign", action="store_true", help="run without injections (negative examples)")
-    parser.add_argument("--user-tasks", default=None, help="comma-separated ids, e.g. user_task_0,user_task_1")
+    parser.add_argument(
+        "--benign",
+        action="store_true",
+        help="run without injections (negative examples)",
+    )
+    parser.add_argument(
+        "--user-tasks",
+        default=None,
+        help="comma-separated ids, e.g. user_task_0,user_task_1",
+    )
     parser.add_argument("--injection-tasks", default=None, help="comma-separated ids")
-    parser.add_argument("--limit", type=int, default=None, help="keep only the first N user tasks and N injection tasks")
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+        help="keep only the first N user tasks and N injection tasks",
+    )
     parser.add_argument("--temperature", type=float, default=0.7)
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--logdir", default="runs")
@@ -71,7 +86,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def select(task_map: dict, csv: str | None, limit: int | None) -> list[str]:
     """Pick task ids: explicit list if given, else all, then truncate."""
-    ids = [part.strip() for part in csv.split(",") if part.strip()] if csv else list(task_map)
+    ids = (
+        [part.strip() for part in csv.split(",") if part.strip()]
+        if csv
+        else list(task_map)
+    )
     missing = [i for i in ids if i not in task_map]
     if missing:
         raise SystemExit(f"Unknown task ids {missing}. Available: {list(task_map)}")
@@ -86,6 +105,13 @@ def rates(results: dict[tuple[str, str], bool]) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """
+    Will run with increasing temperature to make more test cases.
+    workspace, travel, banking, slack.
+    As of 10/30, only workspace is done, leaving others three.
+    I will also have to run benign sessions without agents being attacked. Model: gpt-4o-mini as deepseek doesn't succumb.
+    Although it's worth to try deepseek in different environments.
+    """
     args = parse_args(argv)
     register_wordings()
 
@@ -123,7 +149,9 @@ def main(argv: list[str] | None = None) -> int:
             if args.attacks.strip() == "all":
                 attack_names = list(WORDINGS)
             else:
-                attack_names = [part.strip() for part in args.attacks.split(",") if part.strip()]
+                attack_names = [
+                    part.strip() for part in args.attacks.split(",") if part.strip()
+                ]
             if args.include_builtin:
                 attack_names.append(BUILTIN_ATTACK)
 
@@ -131,7 +159,9 @@ def main(argv: list[str] | None = None) -> int:
             # so built-in attacks can be tested alongside our wordings.
             unknown = [a for a in attack_names if a not in ATTACKS]
             if unknown:
-                raise SystemExit(f"Unknown attacks {unknown}. Known wordings: {list(WORDINGS)}")
+                raise SystemExit(
+                    f"Unknown attacks {unknown}. Known wordings: {list(WORDINGS)}"
+                )
 
             print("=== attack results (security: True = the attack worked) ===")
             for attack_name in attack_names:
@@ -146,13 +176,17 @@ def main(argv: list[str] | None = None) -> int:
                     injection_tasks=injection_ids,
                     verbose=False,
                 )
-                print(f"  {attack_name:<16} security {rates(results['security_results'])}  "
-                      f"| utility {rates(results['utility_results'])}")
+                print(
+                    f"  {attack_name:<16} security {rates(results['security_results'])}  "
+                    f"| utility {rates(results['utility_results'])}"
+                )
     except KeyboardInterrupt:
         print("\ninterrupted - traces written so far are kept", file=sys.stderr)
         return 130
 
-    print("\nDone. Inspect one trace with: uv run python -m benchmark_dojo.data.show_trace")
+    print(
+        "\nDone. Inspect one trace with: uv run python -m benchmark_dojo.data.show_trace"
+    )
     return 0
 
 
