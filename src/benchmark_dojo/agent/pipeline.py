@@ -27,7 +27,9 @@ BASE_URL = "https://openrouter.ai/api/v1"
 SYSTEM_MESSAGE = "You are a helpful assistant."
 
 
-def build_pipeline(model: str = DEFAULT_MODEL, temperature: float = 0.7) -> AgentPipeline:
+def build_pipeline(
+    model: str = DEFAULT_MODEL, temperature: float = 0.7
+) -> AgentPipeline:
     """Build the tool-calling agent under attack.
 
     `pipeline.name` is what AgentDojo uses to name the trace directory, so we
@@ -36,6 +38,8 @@ def build_pipeline(model: str = DEFAULT_MODEL, temperature: float = 0.7) -> Agen
     """
     # AgentDojo fills the prose name of the model into attack templates
     # (`{model}`), and raises if the model is missing from this registry.
+    # It was supposed to use DeepSeek, but I changed it AND forgot changing the name.
+    # That's why some datasets might have included DeepSeek model (only as a name, though!)
     MODEL_NAMES.setdefault(model, "DeepSeek")
 
     client = OpenAI(api_key=openai_key, base_url=BASE_URL)
