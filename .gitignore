@@ -13,4 +13,4 @@ wheels/
 .env
 .DS_Store
 notes.txt
-# generated data
+outline.md
