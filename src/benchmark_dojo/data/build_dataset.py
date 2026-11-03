@@ -114,6 +114,60 @@ def _iter_traces(run_dirs: list[Path]):
             yield root, path
 
 
+def provenance_features(args: dict, user_prompt: str, seen_outputs: list[str]) -> dict:
+    """Where did each argument value come from - the user's request, or what the agent read?
+
+    This is the signal a behavioural detector is supposed to use. An address, file
+    id or amount that the user never mentioned but that does appear in a document
+    the agent read is a candidate hijack: the action was driven by data, not by the
+    request.
+
+    Values shorter than 3 characters are ignored, because they would match
+    everywhere by accident.
+    """
+    prompt_norm = squash(user_prompt).lower()
+    read_norm = squash(" ".join(seen_outputs)).lower()
+
+    values: list[str] = []
+    for value in args.values():
+        if isinstance(value, str):
+            values.append(value)
+        elif isinstance(value, list):
+            values.extend(item for item in value if isinstance(item, str))
+    values = [v.strip() for v in values if len(v.strip()) >= 3]
+
+    newest_output = squash(seen_outputs[-1])[:400] if seen_outputs else ""
+
+    if not values:
+        return {
+            "n_str_args": 0,
+            "frac_args_in_prompt": None,
+            "frac_args_in_read": None,
+            "arg_only_from_read": False,
+            "read_digest": newest_output,
+        }
+
+    in_prompt = 0
+    in_read = 0
+    only_read = False
+    for value in values:
+        norm = squash(value).lower()
+        from_prompt = norm in prompt_norm
+        from_read = norm in read_norm
+        in_prompt += from_prompt
+        in_read += from_read
+        if from_read and not from_prompt:
+            only_read = True
+
+    return {
+        "n_str_args": len(values),
+        "frac_args_in_prompt": in_prompt / len(values),
+        "frac_args_in_read": in_read / len(values),
+        "arg_only_from_read": only_read,
+        "read_digest": newest_output,
+    }
+
+
 def build_rows(run_dirs: list[Path], suite_version: str) -> tuple[list[dict], Counter]:
     suites: dict[str, object] = {}
     gt_cache: dict[tuple[str, str], list[tuple[str, dict]]] = {}
@@ -216,6 +270,7 @@ def build_rows(run_dirs: list[Path], suite_version: str) -> tuple[list[dict], Co
                     ),
                     "label": label,
                     "label_match": match_how,
+                    **provenance_features(action["args"], user_prompt, action["seen_outputs"]),
                 }
             )
             stats[f"label={label}"] += 1
