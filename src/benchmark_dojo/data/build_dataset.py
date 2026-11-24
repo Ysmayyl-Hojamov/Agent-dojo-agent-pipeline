@@ -270,7 +270,9 @@ def build_rows(run_dirs: list[Path], suite_version: str) -> tuple[list[dict], Co
                     ),
                     "label": label,
                     "label_match": match_how,
-                    **provenance_features(action["args"], user_prompt, action["seen_outputs"]),
+                    **provenance_features(
+                        action["args"], user_prompt, action["seen_outputs"]
+                    ),
                 }
             )
             stats[f"label={label}"] += 1
@@ -287,7 +289,8 @@ def main(argv: list[str] | None = None) -> int:
         default="runs",
         help="folder(s) written by run_dataset.py / splice.py, comma separated (e.g. runs,runs_spliced)",
     )
-    parser.add_argument("--out", default="data/rows.jsonl")
+    # 11/24. V2 Dataset with more spliced data for ALL suites.
+    parser.add_argument("--out", default="data/v2/rows.jsonl")
     parser.add_argument("--suite-version", default="v1.2")
     args = parser.parse_args(argv)
 
