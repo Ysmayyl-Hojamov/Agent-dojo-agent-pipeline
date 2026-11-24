@@ -109,16 +109,20 @@ def vector_to_tool(suite, user_task) -> dict[str, str]:
     return mapping
 
 
-def find_clean_traces(runs_dir: Path, pipeline_filter: str | None) -> dict[str, dict]:
+def find_clean_traces(
+    runs_dir: Path, suite_name: str, pipeline_filter: str | None
+) -> dict[str, dict]:
     """Pick a base clean trace per user task (attack_type is 'none')."""
     traces: dict[str, dict] = {}
     for path in sorted(runs_dir.rglob("none/none.json")):
         if pipeline_filter and pipeline_filter not in str(path):
             continue
         record = json.loads(path.read_text())
+        if record.get("suite_name") != suite_name:  # <-- ADD THIS LINE
+            continue
         user_task_id = record.get("user_task_id") or ""
         if not user_task_id.startswith("user_task_"):
-            continue  # these are the "authorized" traces, not clean user tasks
+            continue
         traces.setdefault(user_task_id, {**record, "_path": str(path)})
     return traces
 
@@ -248,7 +252,7 @@ def main(argv: list[str] | None = None) -> int:
     suite = get_suite(args.benchmark_version, args.suite)
     pipeline = build_pipeline(model=args.model, temperature=0.0)
 
-    clean_traces = find_clean_traces(Path(args.runs), args.pipeline)
+    clean_traces = find_clean_traces(Path(args.runs), args.suite, args.pipeline)
     if not clean_traces:
         raise SystemExit(
             f"No clean traces in {Path(args.runs).resolve()}. "
